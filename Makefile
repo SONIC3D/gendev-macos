@@ -244,8 +244,7 @@ $(TOOLSDIR)/zasm_osx: external/zasm-3.0.21-i386-osx10.6-2012-04-08.zip
 	- mkdir -p work/zasm 
 	cd work/zasm && \
 	unzip ../../$< && \
-	cd zasm-3.0.21-i386-osx10.6-2012-04-08/source && \
-	$(MAKE) && \
+	cd zasm && \
 	cp zasm $@
 
 $(TOOLSDIR)/zasm: $(ZASM_PLATFORM_TARGET)
