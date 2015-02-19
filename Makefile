@@ -179,29 +179,29 @@ work/makefile-gen:
 
 work/binutils-$(BINUTILS_VERSION):
 	cd work && \
-	tar xvjf ../binutils-$(BINUTILS_VERSION).tar.bz2
+	tar xvjf ../external/binutils-$(BINUTILS_VERSION).tar.bz2
 
 work/newlib-$(NEWLIB_VERSION):
 	cd work && \
-	tar xvzf ../newlib-$(NEWLIB_VERSION).tar.gz
+	tar xvzf ../external/newlib-$(NEWLIB_VERSION).tar.gz
 
 work/gcc-$(GCC_VERSION):
 	cd work && \
-	tar xvjf ../gcc-$(GCC_VERSION).tar.bz2
+	tar xvjf ../external/gcc-$(GCC_VERSION).tar.bz2
 
 work/gcc-$(GCC_VERSION)/mpfr: work/gcc-$(GCC_VERSION)
 	cd work && \
-	tar xvjf ../mpfr-$(MPFR_VERSION).tar.bz2 && \
+	tar xvjf ../external/mpfr-$(MPFR_VERSION).tar.bz2 && \
 	mv mpfr-$(MPFR_VERSION) gcc-$(GCC_VERSION)/mpfr
 
 work/gcc-$(GCC_VERSION)/mpc: work/gcc-$(GCC_VERSION)
 	cd work && \
-	tar xvzf ../mpc-$(MPC_VERSION).tar.gz && \
+	tar xvzf ../external/mpc-$(MPC_VERSION).tar.gz && \
 	mv mpc-$(MPC_VERSION) gcc-$(GCC_VERSION)/mpc
 
 work/gcc-$(GCC_VERSION)/gmp: work/gcc-$(GCC_VERSION)
 	cd work && \
-	tar xvjf ../gmp-$(GMP_VERSION).tar.bz2 && \
+	tar xvjf ../external/gmp-$(GMP_VERSION).tar.bz2 && \
 	mv gmp-$(GMP_VERSION) gcc-$(GCC_VERSION)/gmp
 
 #########################################################
