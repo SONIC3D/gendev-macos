@@ -248,6 +248,7 @@ $(TOOLSDIR)/zasm_osx: external/zasm-3.0.21-i386-osx10.6-2012-04-08.zip
 	cp zasm $@
 
 $(TOOLSDIR)/zasm: $(ZASM_PLATFORM_TARGET)
+	- mv $(ZASM_PLATFORM_TARGET) $@
 
 $(TOOLSDIR)/hex2bin: external/Hex2bin-1.0.10.tar.bz2
 	- mkdir -p work 
