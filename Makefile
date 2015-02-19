@@ -68,7 +68,7 @@ TOOLS+=$(TOOLSDIR)/zasm
 endif
 
 tools: $(TOOLSDIR) $(TOOLS)
-	-cp extras/scripts/* $(TOOLSDIR)/.
+	-cp -r extras/scripts/* $(TOOLSDIR)/.
 	echo "Done with tools."
 
 clean:
