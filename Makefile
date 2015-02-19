@@ -24,7 +24,7 @@ FILES=external/gcc-$(GCC_VERSION).tar.bz2 \
 	  external/binutils-$(BINUTILS_VERSION).tar.bz2 \
 	  external/newlib-$(NEWLIB_VERSION).tar.gz
 
-all: setup build postbuildNoTools
+all: setup build postbuild
 
 setup: work external $(FILES) work/gcc-$(GCC_VERSION) work/gcc-$(GCC_VERSION)/mpfr work/gcc-$(GCC_VERSION)/mpc work/gcc-$(GCC_VERSION)/gmp work/binutils-$(BINUTILS_VERSION) work/newlib-$(NEWLIB_VERSION) work/makefile-gen
 
@@ -44,14 +44,6 @@ build: /opt/toolchains/gen
 	patch -u < ../files/makefile-gen.diff || true && \
 	MAKE=$(MAKE) $(MAKE) -f makefile-gen
 
-postbuildNoTools: /opt/toolchains/gen/ldscripts
-	echo "Post build."
-	echo "export GENDEV=/opt/toolchains/gen" > ~/.gendev
-	echo "export PATH=\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.gendev
-	echo "export GENDEV=/opt/toolchains/gen" > ~/.32xdev
-	echo "export PATH=\$$GENDEV/sh-elf/bin:\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.32xdev
-	cp -r sgdk/skeleton /opt/toolchains/gen/.
-
 postbuild: /opt/toolchains/gen/ldscripts tools
 	echo "Post build."
 	echo "export GENDEV=/opt/toolchains/gen" > ~/.gendev
@@ -68,13 +60,12 @@ ifeq ($(UNAME), Linux)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_linux
 TOOLS+=$(TOOLSDIR)/zasm
 TOOLS+=$(TOOLSDIR)/vgm_cmp
+TOOLS+=$(TOOLSDIR)/sixpack
+TOOLS+=$(TOOLSDIR)/appack
 else ifeq ($(UNAME), Darwin)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
 endif
-TOOLS+=$(TOOLSDIR)/sixpack 
-TOOLS+=$(TOOLSDIR)/appack
-TOOLS+=/opt/toolchains
 
 tools: $(TOOLSDIR) $(TOOLS)
 	-cp extras/scripts/* $(TOOLSDIR)/.
