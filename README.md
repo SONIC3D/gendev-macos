@@ -29,3 +29,10 @@ And it should be chmoded to make the shell user writable.
 sudo mkdir -p /opt/toolchains/gen
 chmod -R 777 /opt
 ```
+
+## Basic Instructions:
+```
+git clone http://github.com/SONIC3D/gendev-macos.git
+cd gendev-macos
+make
+```
