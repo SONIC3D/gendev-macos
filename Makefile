@@ -40,6 +40,8 @@ gendev_1_all.deb: pkg/opt
 
 build: /opt/toolchains/gen
 	echo "Build"
+	cd work/gcc-$(GCC_VERSION)/gcc/config/sh && \
+	patch -u < ../../../../../files/sh.c.diff || true && cd ../../../../../
 	cd work && \
 	patch -u < ../files/makefile-gen.diff || true && \
 	MAKE=$(MAKE) $(MAKE) -f makefile-gen

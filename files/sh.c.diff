@@ -1,0 +1,18 @@
+--- sh.c.old	2013-03-13 11:09:10.000000000 -0700
++++ sh.c	2015-07-24 03:24:07.000000000 -0700
+@@ -26,6 +26,7 @@
+ #include <cstdlib>
+ 
+ #include "config.h"
++#include <sstream>
+ #include "system.h"
+ #include "coretypes.h"
+ #include "tm.h"
+@@ -60,7 +61,6 @@
+ #include "tm-constrs.h"
+ #include "opts.h"
+ 
+-#include <sstream>
+ #include <vector>
+ #include <algorithm>
+ 
