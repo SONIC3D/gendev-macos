@@ -10,14 +10,15 @@ with minimal changes applied.
 
 ## Prerequisites
 ###OS and Build tools
-Mac OS X 10.8.5 with XCode 5.x command line tools is the reference build environment for
-current version.That means it should be successfully built under Clang 5.x.
+Mac OS X 10.8.5 with Command Line Tools(OS X Mountain Lion) for Xcode October 2013 is the 
+reference build environment for current version.That means it should be successfully built
+under Clang 5.x.
 
-*I have not test building it with toolchain in MacPorts.So if you have MacPorts installed 
-and got failed in building.I suggest you install a clean OS X in a Virtual Machine and get
-a copy of XCode command line tool from https://developer.apple.com/downloads/
+* I have not tested building it with toolchain in MacPorts.So if you have MacPorts 
+installed and got failed in building.I suggest you install a clean OS X in a Virtual 
+Machine and get a copy of XCode command line from:https://developer.apple.com/downloads/
 
-**Recently I have received error reports on building this toolchain under OS X Yosemite
+** Recently I have received error reports on building this toolchain under OS X Yosemite
 with XCode 6.x command line tools.I will update this toolchain build script soon.Actually 
 I think several files in gcc should be patched to adopt Clang 6.x.
 
