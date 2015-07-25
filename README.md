@@ -56,4 +56,9 @@ Make proper exports for the toolchain before compile any genesis/32x project:
 ```
 Check mattkubilus's gendev project site at the beginning of this file and the url below 
 for further information:
+
+  Chilly Willy's Topic on Building a Genesis/SCD/32X toolchain:
   http://gendev.spritesmind.net/forum/viewtopic.php?t=889
+  
+  And Stephane's SGDK if you need stable library code for common feature:
+  https://github.com/Stephane-D/SGDK
