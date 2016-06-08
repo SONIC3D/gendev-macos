@@ -1,4 +1,4 @@
-#
+
 # HINT: If makeinfo is missing on Ubuntu, install texinfo package.
 #
 
@@ -17,16 +17,23 @@ GMP_VERSION=5.0.5
 BINUTILS_VERSION=2.24
 NEWLIB_VERSION=1.19.0
 
-FILES=external/gcc-$(GCC_VERSION).tar.bz2 \
-	  external/mpfr-$(MPFR_VERSION).tar.bz2 \
-	  external/mpc-$(MPC_VERSION).tar.gz \
-	  external/gmp-$(GMP_VERSION).tar.bz2 \
-	  external/binutils-$(BINUTILS_VERSION).tar.bz2 \
-	  external/newlib-$(NEWLIB_VERSION).tar.gz
+all: setup toolchain_build /opt/toolchains/gen/ldscripts tools sgdk_build
+	echo "export GENDEV=/opt/toolchains/gen" > ~/.gendev
+	echo "export PATH=\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.gendev
+	cp -r sgdk/skeleton /opt/toolchains/gen/.
 
-all: setup build postbuild
+32x: setup toolchain_build_full /opt/toolchains/gen/ldscripts tools
+	echo "export GENDEV=/opt/toolchains/gen" > ~/.32xdev
+	echo "export PATH=\$$GENDEV/sh-elf/bin:\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.32xdev
 
-setup: work external $(FILES) work/gcc-$(GCC_VERSION) work/gcc-$(GCC_VERSION)/mpfr work/gcc-$(GCC_VERSION)/mpc work/gcc-$(GCC_VERSION)/gmp work/binutils-$(BINUTILS_VERSION) work/newlib-$(NEWLIB_VERSION) work/makefile-gen
+setup: \
+	work \
+	work/gcc-$(GCC_VERSION) \
+	work/gcc-$(GCC_VERSION)/mpfr \
+	work/gcc-$(GCC_VERSION)/mpc \
+	work/gcc-$(GCC_VERSION)/gmp \
+	work/binutils-$(BINUTILS_VERSION) \
+	work/newlib-$(NEWLIB_VERSION)
 
 gendev.txz: /opt/toolchains/gen/ldscripts
 	tar cJvf gendev.txz /opt/toolchains/gen
@@ -38,21 +45,29 @@ pkg/opt:
 gendev_1_all.deb: pkg/opt
 	dpkg-deb -Zxz -z9 --build pkg .
 
-build: /opt/toolchains/gen
+deb: gendev_1_all.deb
+
+toolchain_build: work /opt/toolchains/gen
 	echo "Build"
 	cd work/gcc-$(GCC_VERSION)/gcc/config/sh && \
 	patch -u < ../../../../../files/sh.c.diff || true && cd ../../../../../
 	cd work && \
-	patch -u < ../files/makefile-gen.diff || true && \
-	MAKE=$(MAKE) $(MAKE) -f makefile-gen
+		MAKE=$(MAKE) $(MAKE) -f ../gen_gcc/makefile-gen build-m68k
 
-postbuild: /opt/toolchains/gen/ldscripts tools
-	echo "Post build."
-	echo "export GENDEV=/opt/toolchains/gen" > ~/.gendev
-	echo "export PATH=\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.gendev
-	echo "export GENDEV=/opt/toolchains/gen" > ~/.32xdev
-	echo "export PATH=\$$GENDEV/sh-elf/bin:\$$GENDEV/m68k-elf/bin:\$$GENDEV/bin:\$$PATH" >> ~/.32xdev
-	cp -r sgdk/skeleton /opt/toolchains/gen/.
+toolchain_build_full: work /opt/toolchains/gen
+	echo "Build"
+	cd work/gcc-$(GCC_VERSION)/gcc/config/sh && \
+	patch -u < ../../../../../files/sh.c.diff || true && cd ../../../../../
+	cd work && \
+		MAKE=$(MAKE) $(MAKE) -f ../gen_gcc/makefile-gen
+
+sgdk_build: /opt/toolchains/gen/m68k-elf/lib/libmd.a
+/opt/toolchains/gen/m68k-elf/lib/libmd.a:
+	cd sgdk && make install 	
+
+sgdk_clean:
+	- cd sgdk && make clean
+	- rm /opt/toolchains/gen/m68k-elf/lib/libmd.a
 
 TOOLSDIR=/opt/toolchains/gen/bin
 
@@ -61,140 +76,153 @@ TOOLS+=$(TOOLSDIR)/sjasm
 ifeq ($(UNAME), Linux)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_linux
 TOOLS+=$(TOOLSDIR)/zasm
-TOOLS+=$(TOOLSDIR)/vgm_cmp
-TOOLS+=$(TOOLSDIR)/sixpack
+#TOOLS+=$(TOOLSDIR)/vgm_cmp
+TOOLS+=$(TOOLSDIR)/sixpack 
 TOOLS+=$(TOOLSDIR)/appack
 else ifeq ($(UNAME), Darwin)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
+else
+TOOLS+=$(TOOLSDIR)/sixpack 
+TOOLS+=$(TOOLSDIR)/appack
 endif
+TOOLS+=/opt/toolchains
 
 tools: $(TOOLSDIR) $(TOOLS)
 	-cp -r extras/scripts/* $(TOOLSDIR)/.
 	echo "Done with tools."
 
-clean:
-	rm -rf work
+clean: clean_tools
+	-rm -rf work/gcc-$(GCC_VERSION)
+	-rm -rf work/binutils-$(BINUTILS_VERSION)
+	-rm -rf work/build-*
+	-cd sgdk && make clean
+
+clean_tools:
+	-rm -rf work/bin2c
+	-rm -rf work/sjasm
+	-rm -rf work/zasm
+	-rm -rf work/hexbin
+	-rm -rf work/sixpack
+	-rm -rf work/vgmtools
 
 purge: clean
-	- rm *.rar *.bz2 *.gz *.tgz *.zip
+	- rm -rf work
 	- rm gendev.tgz
 	- rm gendev*.deb
 	- rm -rf pkg/opt
 
 work:
-	mkdir work
-
-external:
-	mkdir external
+	[ -d work ] || mkdir work
 
 #########################################################
 #########################################################
 #########################################################
 
-external/gcc-$(GCC_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
+GCC_PKG=work/gcc-$(GCC_VERSION).tar.bz2
+work/gcc-$(GCC_VERSION).tar.bz2:
+	#cd work && $(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
+	cp files/`basename $@` $@
+	
+#g++: work/gcc-g++-$(GCC_VERSION).tar.bz2
+#work/gcc-g++-$(GCC_VERSION).tar.bz2:
+#	cd work && $(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-g++-$(GCC_VERSION).tar.bz2
 
-external/gcc-g++-$(GCC_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-g++-$(GCC_VERSION).tar.bz2
+#work/gcc-objc-$(GCC_VERSION).tar.bz2:
+#	cd work && $(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-objc-$(GCC_VERSION).tar.bz2
 
-external/gcc-objc-$(GCC_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-objc-$(GCC_VERSION).tar.bz2
+MPFR_PKG=work/mpfr-$(MPFR_VERSION).tar.bz2
+work/mpfr-$(MPFR_VERSION).tar.bz2: 
+	#cd work && $(MGET) http://www.mpfr.org/mpfr-$(MPFR_VERSION)/mpfr-$(MPFR_VERSION).tar.bz2
+	cp files/`basename $@` $@
 
-external/mpfr-$(MPFR_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) http://www.mpfr.org/mpfr-$(MPFR_VERSION)/mpfr-$(MPFR_VERSION).tar.bz2
+MPC_PKG=work/mpc-$(MPC_VERSION).tar.gz
+work/mpc-$(MPC_VERSION).tar.gz:
+	#cd work && $(MGET) http://www.multiprecision.org/mpc/download/mpc-$(MPC_VERSION).tar.gz
+	cp files/`basename $@` $@
 
-external/mpc-$(MPC_VERSION).tar.gz:
-	cd external && \
-	$(MGET) http://www.multiprecision.org/mpc/download/mpc-$(MPC_VERSION).tar.gz
+GMP_PKG=work/gmp-$(GMP_VERSION).tar.bz2
+work/gmp-$(GMP_VERSION).tar.bz2:
+	#cd work && $(MGET) ftp://ftp.gmplib.org/pub/gmp-$(GMP_VERSION)/gmp-$(GMP_VERSION).tar.bz2
+	cp files/`basename $@` $@
 
-external/gmp-$(GMP_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) ftp://ftp.gmplib.org/pub/gmp-$(GMP_VERSION)/gmp-$(GMP_VERSION).tar.bz2
+BINUTILS_PKG=work/binutils-$(BINUTILS_VERSION).tar.bz2
+work/binutils-$(BINUTILS_VERSION).tar.bz2:
+	#cd work && $(MGET) http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
+	cp files/`basename $@` $@
 
-external/binutils-$(BINUTILS_VERSION).tar.bz2:
-	cd external && \
-	$(MGET) http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
+NEWLIB_PKG=work/newlib-$(NEWLIB_VERSION).tar.gz
+work/newlib-$(NEWLIB_VERSION).tar.gz:
+	#cd work && $(MGET) ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
+	cp files/`basename $@` $@
 
-external/newlib-$(NEWLIB_VERSION).tar.gz:
-	cd external && \
-	$(MGET) ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
+BIN2C_PKG=work/bin2c-1.0.zip
+work/bin2c-1.0.zip:
+	#cd work && $(MGET) http://downloads.sourceforge.net/project/bin2c/1.0/bin2c-1.0.zip
+	cp files/`basename $@` $@
+
+SJASM_PKG=work/sjasm39g6.zip
+work/sjasm39g6.zip:
+	#cd work && $(MGET) http://home.online.nl/smastijn/sjasm39g6.zip
+	cp files/`basename $@` $@
+
+ZASM_PKG_LINUX=work/zasm-3.0.21-source-linux-2011-06-19.zip
+work/zasm-3.0.21-source-linux-2011-06-19.zip:
+	#cd work && $(MGET) http://k1.spdns.de/Develop/Projects/zasm/Distributions/old%20versions/zasm-3.0.21-source-linux-2011-06-19.zip 
+	cp files/`basename $@` $@
+
+ZASM_PKG_OSX=work/zasm-3.0.21-i386-osx10.6-2012-04-08.zip
+work/zasm-3.0.21-i386-osx10.6-2012-04-08.zip:
+	#cd work && $(MGET) http://k1.spdns.de/Develop/Projects/zasm/distributions/old%20versions/zasm-3.0.21-i386-osx10.6-2012-04-08.zip 
+	cp files/`basename $@` $@
+
+HEXBIN_PKG=work/Hex2bin-1.0.10.tar.bz2
+work/Hex2bin-1.0.10.tar.bz2:
+	#cd work && $(MGET) http://downloads.sourceforge.net/project/hex2bin/hex2bin/$@
+	cp files/`basename $@` $@
+
+#work/genres_01.zip: 
+#	cd work && $(MGET) http://gendev.spritesmind.net/files/genres_01.zip
+
+SIXPACK_PKG=work/sixpack-13.zip
+work/sixpack-13.zip:
+	#cd work && $(MGET) http://jiggawatt.org/badc0de/sixpack/sixpack-13.zip
+	cp files/`basename $@` $@
+
+VGMTOOL_PKG=work/VGMTools_src.zip
+work/VGMTools_src.zip:
+	#$(MGET) -O $@ http://www.smspower.org/forums/download.php?id=3201
+	cp files/`basename $@` $@
 
 #########################################################
-
-external/bin2c-1.0.zip:
-#	cd external && \
-#	$(MGET) http://downloads.sourceforge.net/project/bin2c/bin2c-1.0.zip
-
-external/sjasm39g6.zip:
-#	cd external && \
-#	$(MGET) http://home.online.nl/smastijn/sjasm39g6.zip
-
-external/zasm-3.0.21-source-linux-2011-06-19.zip:
-#	cd external && \
-#	$(MGET) http://k1.dyndns.org/Develop/projects/zasm/distributions/zasm-3.0.21-source-linux-2011-06-19.zip
-
-external/zasm-3.0.21-i386-osx10.6-2012-04-08.zip:
-#	cd external && \
-#	$(MGET) http://k1.spdns.de/Develop/Projects/zasm/distributions/old%20versions/zasm-3.0.21-i386-osx10.6-2012-04-08.zip
-
-external/Hex2bin-1.0.10.tar.bz2:
-#	cd external && \
-#	$(MGET) http://downloads.sourceforge.net/project/hex2bin/hex2bin/Hex2bin-1.0.10.tar.bz2
-
-##external/genres_01.zip:
-##	cd external && \
-##	$(MGET) http://gendev.spritesmind.net/files/genres_01.zip
-
-external/sixpack-13.zip:
-#	cd external && \
-#	$(MGET) http://jiggawatt.org/badc0de/sixpack/sixpack-13.zip
-
-#external/VGMTools_src.rar:
-#	cd external && \
-#	$(MGET) -O VGMTools_src.rar http://www.smspower.org/forums/download.php?id=3201
-
-external/VGMTools_src.zip:
-#
-#
-
-#########################################################
 #########################################################
 #########################################################
 
-work/makefile-gen:
+work/binutils-$(BINUTILS_VERSION): $(BINUTILS_PKG)
 	cd work && \
-	unzip ../files/makefiles-ldscripts-2.zip
+	tar xvjf binutils-$(BINUTILS_VERSION).tar.bz2
 
-work/binutils-$(BINUTILS_VERSION):
+work/newlib-$(NEWLIB_VERSION): $(NEWLIB_PKG)
 	cd work && \
-	tar xvjf ../external/binutils-$(BINUTILS_VERSION).tar.bz2
+	tar xvzf newlib-$(NEWLIB_VERSION).tar.gz
 
-work/newlib-$(NEWLIB_VERSION):
+work/gcc-$(GCC_VERSION): $(GCC_PKG)
 	cd work && \
-	tar xvzf ../external/newlib-$(NEWLIB_VERSION).tar.gz
+	tar xvjf gcc-$(GCC_VERSION).tar.bz2
 
-work/gcc-$(GCC_VERSION):
+work/gcc-$(GCC_VERSION)/mpfr: work/gcc-$(GCC_VERSION) $(MPFR_PKG)
 	cd work && \
-	tar xvjf ../external/gcc-$(GCC_VERSION).tar.bz2
-
-work/gcc-$(GCC_VERSION)/mpfr: work/gcc-$(GCC_VERSION)
-	cd work && \
-	tar xvjf ../external/mpfr-$(MPFR_VERSION).tar.bz2 && \
+	tar xvjf mpfr-$(MPFR_VERSION).tar.bz2 && \
 	mv mpfr-$(MPFR_VERSION) gcc-$(GCC_VERSION)/mpfr
 
-work/gcc-$(GCC_VERSION)/mpc: work/gcc-$(GCC_VERSION)
+work/gcc-$(GCC_VERSION)/mpc: work/gcc-$(GCC_VERSION) $(MPC_PKG)
 	cd work && \
-	tar xvzf ../external/mpc-$(MPC_VERSION).tar.gz && \
+	tar xvzf mpc-$(MPC_VERSION).tar.gz && \
 	mv mpc-$(MPC_VERSION) gcc-$(GCC_VERSION)/mpc
 
-work/gcc-$(GCC_VERSION)/gmp: work/gcc-$(GCC_VERSION)
+work/gcc-$(GCC_VERSION)/gmp: work/gcc-$(GCC_VERSION) $(GMP_PKG)
 	cd work && \
-	tar xvjf ../external/gmp-$(GMP_VERSION).tar.bz2 && \
+	tar xvjf gmp-$(GMP_VERSION).tar.bz2 && \
 	mv gmp-$(GMP_VERSION) gcc-$(GCC_VERSION)/gmp
 
 #########################################################
@@ -211,57 +239,55 @@ work/gcc-$(GCC_VERSION)/gmp: work/gcc-$(GCC_VERSION)
 	#sudo chmod 777 $@
 
 $(TOOLSDIR):
-	mkdir -p $@
+	[ -d $@ ] || mkdir -p $@
 
-/opt/toolchains/gen/ldscripts: work/makefile-gen
+/opt/toolchains/gen/ldscripts:
 	mkdir -p $@
-	cp work/*.ld $@/.
+	cp gen_gcc/*.ld $@/.
 
-$(TOOLSDIR)/bin2c: external/bin2c-1.0.zip
-	- mkdir -p work 
+$(TOOLSDIR)/bin2c: $(BIN2C_PKG)
 	cd work && \
-	unzip ../$< && \
+	unzip bin2c-1.0.zip && \
 	cd bin2c && \
 	gcc bin2c.c -o bin2c && \
 	cp bin2c $@ 
 
-$(TOOLSDIR)/sjasm: external/sjasm39g6.zip
+$(TOOLSDIR)/sjasm: $(SJASM_PKG)
 	- mkdir -p work/sjasm
 	cd work/sjasm && \
-	unzip ../../$< && \
+	unzip ../sjasm39g6.zip && \
 	cd sjasmsrc39g6 && \
 	$(MAKE) && \
 	cp sjasm $@ && \
 	chmod +x $@
 
-$(TOOLSDIR)/zasm_linux: external/zasm-3.0.21-source-linux-2011-06-19.zip
+$(TOOLSDIR)/zasm_linux: $(ZASM_PKG_LINUX)
 	- mkdir -p work/zasm 
 	cd work/zasm && \
-	unzip ../../$< && \
+	unzip ../zasm-3.0.21-source-linux-2011-06-19.zip && \
 	cd zasm-3.0.21-i386-ubuntu-linux-2011-06-19/source && \
 	$(MAKE) && \
 	cp zasm $@
 
-$(TOOLSDIR)/zasm_osx: external/zasm-3.0.21-i386-osx10.6-2012-04-08.zip
+$(TOOLSDIR)/zasm_osx: $(ZASM_PKG_OSX)
 	- mkdir -p work/zasm 
 	cd work/zasm && \
-	unzip ../../$< && \
+	unzip ../zasm-3.0.21-i386-osx10.6-2012-04-08.zip && \
 	cd zasm && \
 	cp zasm $@
 
 $(TOOLSDIR)/zasm: $(ZASM_PLATFORM_TARGET)
 	- mv $(ZASM_PLATFORM_TARGET) $@
 
-$(TOOLSDIR)/hex2bin: external/Hex2bin-1.0.10.tar.bz2
-	- mkdir -p work 
+$(TOOLSDIR)/hex2bin: $(HEXBIN_PKG)
 	cd work && \
-	tar xvjf ../$< && \
+	tar xvjf $< && \
 	cp Hex2bin-1.0.10/hex2bin $@
 
-sixpack $(TOOLSDIR)/sixpack: external/sixpack-13.zip
+$(TOOLSDIR)/sixpack: $(SIXPACK_PKG)
 	- mkdir -p work/sixpack && \
 	cd work/sixpack && \
-	unzip ../../$< 
+	unzip ../sixpack-13.zip 
 	cp work/sixpack/sixpack-12/bin/sixpack $@ 
 	chmod +x $@	
 
@@ -271,7 +297,7 @@ sixpack $(TOOLSDIR)/sixpack: external/sixpack-13.zip
 #	unzip ../../$< 
 	
 
-$(TOOLSDIR)/vgm_cmp: external/VGMTools_src.zip
+$(TOOLSDIR)/vgm_cmp: $(VGMTOOL_PKG)
 	- mkdir -p work/vgmtools
 	cd work/vgmtools && \
 	unzip ../../$< 
