@@ -1,17 +1,29 @@
-CC = m68k-elf-gcc
-AS = m68k-elf-as
-OBJC = m68k-elf-objcopy
-LD = m68k-elf-ld
-RM = rm -f
-ASMZ80 = zasm
-BINTOS = bintos
-PCMTORAW = pcmtoraw
-WAVTORAW = wavtoraw
+GENDEV?=/opt/toolchains/gen/
+GCC_VER?=4.8.2
+
+MAKE?=make
+LIB?=lib
+GENGCC_BIN=$(GENDEV)/m68k-elf/bin
+GENBIN=$(GENDEV)/bin
+
+CC = $(GENGCC_BIN)/m68k-elf-gcc 
+AS = $(GENGCC_BIN)/m68k-elf-as
+AR = $(GENGCC_BIN)/m68k-elf-ar 
+LD = $(GENGCC_BIN)/m68k-elf-ld
+RANLIB = $(GENGCC_BIN)/m68k-elf-ranlib 
+OBJC = $(GENGCC_BIN)/m68k-elf-objcopy 
+BINTOS = $(GENBIN)/bintos 
+RESCOMP= $(GENBIN)/rescomp
+XGMTOOL= $(GENBIN)/xgmtool
+PCMTORAW = $(GENBIN)/pcmtoraw
+WAVTORAW = $(GENBIN)/wavtoraw
+SIZEBND = $(GENBIN)/sizebnd
+ASMZ80 = $(GENBIN)/zasm
+
+RM = rm -f 
 NM = nm
 NM2WCH = nm2wch
-SIZEBND = sizebnd
 MKISOFS = mkisofs
-RESCOMP= rescomp
 
 SCD_LOADER = scd/LukeProjectCD
 
@@ -25,7 +37,18 @@ ASFLAGS = -m68000 --register-prefix-optional
 LIBS =  -L$(GENDEV)/m68k-elf/lib -L$(GENDEV)/m68k-elf/lib/gcc/m68k-elf/* -L$(GENDEV)/m68k-elf/m68k-elf/lib -lmd -lnosys 
 LINKFLAGS = -T $(GENDEV)/ldscripts/sgdk.ld -nostdlib 
 SCDLINKFLAGS = -T scd/mdcd.ld -nostdlib 
-ARCHIVES = $(GENDEV)/m68k-elf/lib/libmd.a $(GENDEV)/m68k-elf/lib/gcc/m68k-elf/*/libgcc.a 
+ARCHIVES = $(GENDEV)/m68k-elf/lib/libmd.a 
+
+
+# Are we AMD64?
+#LBITS := $(shell getconf LONG_BIT)
+#ifeq ($(LBITS), 64)
+#ARCHIVES += $(GENDEV)/m68k-elf/lib64/gcc/m68k-elf/$(GCC_VER)/libgcc.a 
+#else
+#ARCHIVES += $(GENDEV)/m68k-elf/lib/gcc/m68k-elf/$(GCC_VER)/libgcc.a 
+#endif 
+
+ARCHIVES += $(GENDEV)/m68k-elf/$(LIB)/gcc/m68k-elf/$(GCC_VER)/libgcc.a 
 
 RESOURCES=
 BOOT_RESOURCES=
@@ -106,7 +129,7 @@ out.iso: out.elf_scd
 
 %.bin: %.elf
 	$(OBJC) -O binary $< temp.bin
-	dd if=temp.bin of=$@ bs=8K conv=sync
+	dd if=temp.bin of=$@ bs=8192 conv=sync
 
 %.elf: $(OBJS) $(BOOT_RESOURCES)
 	$(CC) -o $@ $(LINKFLAGS) $(BOOT_RESOURCES) $(ARCHIVES) $(OBJS) $(LIBS)
