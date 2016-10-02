@@ -4,7 +4,7 @@
 
 #SHELL=/bin/sh
 
-MGET?= wget
+MGET?= curl
 MAKE?= make
 ORIG_USER:=$(shell whoami)
 
@@ -118,9 +118,35 @@ work:
 #########################################################
 #########################################################
 #########################################################
+# download files to local cache dir
+GCC_PKG_CACHING=files/gcc-$(GCC_VERSION).tar.bz2
+files/gcc-$(GCC_VERSION).tar.bz2:
+	cd files && $(MGET) -o gcc-$(GCC_VERSION).tar.bz2 http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
 
+MPFR_PKG_CACHING=files/mpfr-$(MPFR_VERSION).tar.bz2
+work/mpfr-$(MPFR_VERSION).tar.bz2: 
+	cd files && $(MGET) -o mpfr-$(MPFR_VERSION).tar.bz2 http://www.mpfr.org/mpfr-$(MPFR_VERSION)/mpfr-$(MPFR_VERSION).tar.bz2
+
+MPC_PKG_CACHING=files/mpc-$(MPC_VERSION).tar.gz
+files/mpc-$(MPC_VERSION).tar.gz:
+	cd files && $(MGET) -o mpc-$(MPC_VERSION).tar.gz http://www.multiprecision.org/mpc/download/mpc-$(MPC_VERSION).tar.gz
+
+GMP_PKG_CACHING=files/gmp-$(GMP_VERSION).tar.bz2
+files/gmp-$(GMP_VERSION).tar.bz2:
+	cd files && $(MGET) -o gmp-$(GMP_VERSION).tar.bz2 ftp://ftp.gmplib.org/pub/gmp-$(GMP_VERSION)/gmp-$(GMP_VERSION).tar.bz2
+
+BINUTILS_PKG_CACHING=files/binutils-$(BINUTILS_VERSION).tar.bz2
+files/binutils-$(BINUTILS_VERSION).tar.bz2:
+	cd files && $(MGET) -o binutils-$(BINUTILS_VERSION).tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
+
+NEWLIB_PKG_CACHING=files/newlib-$(NEWLIB_VERSION).tar.gz
+files/newlib-$(NEWLIB_VERSION).tar.gz:
+	cd files && $(MGET) -o newlib-$(NEWLIB_VERSION).tar.gz ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
+
+#########################################################
+# copy files from local download cache to working directory
 GCC_PKG=work/gcc-$(GCC_VERSION).tar.bz2
-work/gcc-$(GCC_VERSION).tar.bz2:
+work/gcc-$(GCC_VERSION).tar.bz2: $(GCC_PKG_CACHING)
 	#cd work && $(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
 	cp files/`basename $@` $@
 	
@@ -132,27 +158,27 @@ work/gcc-$(GCC_VERSION).tar.bz2:
 #	cd work && $(MGET) http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-objc-$(GCC_VERSION).tar.bz2
 
 MPFR_PKG=work/mpfr-$(MPFR_VERSION).tar.bz2
-work/mpfr-$(MPFR_VERSION).tar.bz2: 
+work/mpfr-$(MPFR_VERSION).tar.bz2: $(MPFR_PKG_CACHING)
 	#cd work && $(MGET) http://www.mpfr.org/mpfr-$(MPFR_VERSION)/mpfr-$(MPFR_VERSION).tar.bz2
 	cp files/`basename $@` $@
 
 MPC_PKG=work/mpc-$(MPC_VERSION).tar.gz
-work/mpc-$(MPC_VERSION).tar.gz:
+work/mpc-$(MPC_VERSION).tar.gz: $(MPC_PKG_CACHING)
 	#cd work && $(MGET) http://www.multiprecision.org/mpc/download/mpc-$(MPC_VERSION).tar.gz
 	cp files/`basename $@` $@
 
 GMP_PKG=work/gmp-$(GMP_VERSION).tar.bz2
-work/gmp-$(GMP_VERSION).tar.bz2:
+work/gmp-$(GMP_VERSION).tar.bz2: $(GMP_PKG_CACHING)
 	#cd work && $(MGET) ftp://ftp.gmplib.org/pub/gmp-$(GMP_VERSION)/gmp-$(GMP_VERSION).tar.bz2
 	cp files/`basename $@` $@
 
 BINUTILS_PKG=work/binutils-$(BINUTILS_VERSION).tar.bz2
-work/binutils-$(BINUTILS_VERSION).tar.bz2:
+work/binutils-$(BINUTILS_VERSION).tar.bz2: $(BINUTILS_PKG_CACHING)
 	#cd work && $(MGET) http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
 	cp files/`basename $@` $@
 
 NEWLIB_PKG=work/newlib-$(NEWLIB_VERSION).tar.gz
-work/newlib-$(NEWLIB_VERSION).tar.gz:
+work/newlib-$(NEWLIB_VERSION).tar.gz: $(NEWLIB_PKG_CACHING)
 	#cd work && $(MGET) ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
 	cp files/`basename $@` $@
 
