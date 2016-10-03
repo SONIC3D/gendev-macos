@@ -84,10 +84,9 @@ else ifeq ($(UNAME), Darwin)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
 else
-TOOLS+=$(TOOLSDIR)/sixpack 
+TOOLS+=$(TOOLSDIR)/sixpack
 TOOLS+=$(TOOLSDIR)/appack
 endif
-TOOLS+=/opt/toolchains
 
 tools: $(TOOLSDIR) $(TOOLS)
 	-cp -r extras/scripts/* $(TOOLSDIR)/.
