@@ -124,7 +124,7 @@ files/gcc-$(GCC_VERSION).tar.bz2:
 	cd files && $(MGET) -o gcc-$(GCC_VERSION).tar.bz2 http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
 
 MPFR_PKG_CACHING=files/mpfr-$(MPFR_VERSION).tar.bz2
-work/mpfr-$(MPFR_VERSION).tar.bz2: 
+files/mpfr-$(MPFR_VERSION).tar.bz2: 
 	cd files && $(MGET) -o mpfr-$(MPFR_VERSION).tar.bz2 http://www.mpfr.org/mpfr-$(MPFR_VERSION)/mpfr-$(MPFR_VERSION).tar.bz2
 
 MPC_PKG_CACHING=files/mpc-$(MPC_VERSION).tar.gz
