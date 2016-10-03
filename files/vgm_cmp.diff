@@ -1,5 +1,5 @@
---- vgm_cmp.c.orig	2011-08-14 15:51:52.000000000 -0400
-+++ vgm_cmp.c	2012-10-30 19:25:16.937415508 -0400
+--- vgm_cmp.c	2011-08-14 15:51:52.000000000 +0800
++++ vgm_cmp_new.c	2016-10-04 06:26:24.000000000 +0800
 @@ -11,7 +11,7 @@
  #include <windows.h>	// for GetTickCount
  #endif
@@ -9,13 +9,43 @@
  
  #include "stdtype.h"
  #include "VGMFile.h"
-@@ -782,7 +782,8 @@
- 		VGMPos += CmdLen;
+@@ -112,11 +112,11 @@
+ 	PassNo = 0x00;
+ 	do
+ 	{
+-		printf("Pass #%hu ...\n", PassNo + 1);
++		printf("Pass #%u ...\n", PassNo + 1);
+ 		CompressVGMData();
+ 		if (! PassNo)
+ 			SrcDataSize = DataSizeA;
+-		printf("    Data Compression: %lu -> %lu (%.1f %%)\n",
++		printf("    Data Compression: %u -> %u (%.1f %%)\n",
+ 				DataSizeA, DataSizeB, 100.0 * DataSizeB / (float)DataSizeA);
+ 		if (DataSizeB < DataSizeA)
+ 		{
+@@ -128,7 +128,7 @@
+ 		}
+ 		PassNo ++;
+ 	} while(DataSizeB < DataSizeA);
+-	printf("Data Compression Total: %lu -> %lu (%.1f %%)\n",
++	printf("Data Compression Total: %u -> %u (%.1f %%)\n",
+ 			SrcDataSize, DataSizeB, 100.0 * DataSizeB / (float)SrcDataSize);
+ 	
+ 	if (DataSizeB < SrcDataSize)
+@@ -649,7 +649,7 @@
+ 					CmdLen = 0x05;
+ 					break;
+ 				default:
+-					printf("Unknown Command: %hX\n", Command);
++					printf("Unknown Command: %X\n", Command);
+ 					CmdLen = 0x01;
+ 					//StopVGM = true;
+ 					break;
+@@ -783,6 +783,7 @@
  		if (StopVGM)
  			break;
--		
-+	
-+        /*    
+ 		
++#ifdef WIN32    
  		if (CmdTimer < GetTickCount())
  		{
  			PrintMinSec(VGMSmplPos, MinSecStr);
@@ -23,7 +53,7 @@
  					MinSecStr, TempStr, VGMPos, VGMHead.lngEOFOffset);
  			CmdTimer = GetTickCount() + 200;
  		}
-+        */
++#endif
  	}
  	DataSizeA = VGMPos - VGMHead.lngDataOffset;
  	DataSizeB = DstPos - VGMHead.lngDataOffset;

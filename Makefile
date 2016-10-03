@@ -83,6 +83,7 @@ TOOLS+=$(TOOLSDIR)/appack
 else ifeq ($(UNAME), Darwin)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
+TOOLS+=$(TOOLSDIR)/vgm_cmp
 else
 TOOLS+=$(TOOLSDIR)/sixpack
 TOOLS+=$(TOOLSDIR)/appack
@@ -329,6 +330,7 @@ $(TOOLSDIR)/vgm_cmp: $(VGMTOOL_PKG)
 	unzip ../../$< 
 	cd work/vgmtools && \
 	patch -u < ../../files/vgm_cmp.diff && \
+	patch -u < ../../files/chip_cmp.diff && \
 	gcc -c chip_cmp.c -o chip_cmp.o && \
 	gcc chip_cmp.o vgm_cmp.c -lz -o vgm_cmp && \
 	cp vgm_cmp $@

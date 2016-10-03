@@ -1,0 +1,17 @@
+--- chip_cmp.c	2011-08-14 16:50:46.000000000 +0800
++++ chip_cmp_new.c	2016-10-04 06:11:56.000000000 +0800
+@@ -1,4 +1,4 @@
+-#include <malloc.h>
++#include <stdlib.h>
+ #include <memory.h>
+ #include <stdio.h>
+ #include "stdbool.h"
+@@ -123,7 +123,7 @@
+ 	YMF271_SLOT slots[48];
+ 	YMF271_GROUP groups[12];
+ 	
+-	UINT8 ext_address[2];
++	UINT8 ext_address[3];
+ 	UINT8 ext_read;
+ } YMF271_DATA;
+ typedef struct ymf278b_data
