@@ -1,4 +1,4 @@
-GENDEV?=/opt/toolchains/gen/
+GENDEV?=/opt/toolchains/gen
 MAKE?=make
 GENBIN=$(GENDEV)/bin
 GENGCC_BIN=$(GENDEV)/m68k-elf/bin
@@ -41,7 +41,8 @@ tools: sgdk-read-only
 		make -f ../../../files/Makefile.xgmtool && cp out/xgmtool $(GENDEV)/bin/.
 	cd sgdk-read-only/tools/rescomp && \
 		patch -u -p0 < ../../../files/rescomp.diff && \
-		make -f ../../../files/Makefile.rescomp && cp out/rescomp $(GENDEV)/bin/.
+		make -f ../../../files/Makefile.rescomp && cp out/rescomp $(GENDEV)/bin/. && \
+		cp ../../bin/lz4w.jar $(GENDEV)/bin/.
 
 patch:
 	cd sgdk-read-only && git diff * > ../files/sgdk.diff
@@ -52,11 +53,11 @@ sgdk-read-only:
 	#svn co http://sgdk.googlecode.com/svn/trunk sgdk-read-only
 	#patch -u -p0 < files/sgdk.diff
 
-sgdk-read-only/libmd.a:
+sgdk-read-only/libmd.a: sgdk-read-only
 	cd sgdk-read-only && ln -sf ../files/Makefile.sgdk_lib .
 	cd sgdk-read-only && $(MAKE) -f Makefile.sgdk_lib 
 
-install: tools sgdk-read-only sgdk-read-only/libmd.a
+install: tools sgdk-read-only/libmd.a
 	echo "Install"
 	cd sgdk-read-only && $(MAKE) -f Makefile.sgdk_lib install
 	install -b sgdk-read-only/md.ld $(GENDEV)/ldscripts/sgdk.ld
