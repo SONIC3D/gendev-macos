@@ -6,7 +6,8 @@
 
 MGET?= curl
 MAKE?= make
-ORIG_USER:=$(shell whoami)
+ORIG_USER:=$(shell id -un)
+ORIG_GROUP:=$(shell id -gn)
 
 UNAME:=$(shell uname)
 
@@ -260,7 +261,7 @@ work/gcc-$(GCC_VERSION)/gmp: work/gcc-$(GCC_VERSION) $(GMP_PKG)
 		mkdir -p $@; \
 	else \
 		sudo mkdir -p $@; \
-		sudo chown $(ORIG_USER):$(ORIG_USER) $@; \
+		sudo chown $(ORIG_USER):$(ORIG_GROUP) $@; \
 	fi
 	#sudo chmod 777 $@
 
