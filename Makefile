@@ -84,6 +84,7 @@ else ifeq ($(UNAME), Darwin)
 ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
 TOOLS+=$(TOOLSDIR)/vgm_cmp
+TOOLS+=$(TOOLSDIR)/appack
 else
 TOOLS+=$(TOOLSDIR)/sixpack
 TOOLS+=$(TOOLSDIR)/appack
@@ -338,6 +339,12 @@ $(TOOLSDIR)/vgm_cmp: $(VGMTOOL_PKG)
 $(TOOLSDIR)/appack: 
 	- mkdir -p work/applib 
 	cp -r files/applib/* work/applib/. 
+ifeq ($(UNAME), Linux)
 	cd work/applib/example && \
 	make -f makefile.elf && \
 	cp appack $@
+else ifeq ($(UNAME), Darwin)
+	cd work/applib/example && \
+	make -f makefile.darwin && \
+	cp appack $@
+endif
