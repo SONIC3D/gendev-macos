@@ -85,6 +85,7 @@ ZASM_PLATFORM_TARGET=$(TOOLSDIR)/zasm_osx
 TOOLS+=$(TOOLSDIR)/zasm
 TOOLS+=$(TOOLSDIR)/vgm_cmp
 TOOLS+=$(TOOLSDIR)/appack
+#TOOLS+=$(TOOLSDIR)/sixpack 
 else
 TOOLS+=$(TOOLSDIR)/sixpack
 TOOLS+=$(TOOLSDIR)/appack
@@ -216,6 +217,9 @@ SIXPACK_PKG=work/sixpack-13.zip
 work/sixpack-13.zip:
 	#cd work && $(MGET) http://jiggawatt.org/badc0de/sixpack/sixpack-13.zip
 	cp files/`basename $@` $@
+ifeq ($(UNAME), Darwin)
+	cp files/sixpack-extra.zip work/sixpack-extra.zip
+endif
 
 VGMTOOL_PKG=work/VGMTools_src.zip
 work/VGMTools_src.zip:
@@ -316,7 +320,15 @@ $(TOOLSDIR)/sixpack: $(SIXPACK_PKG)
 	- mkdir -p work/sixpack && \
 	cd work/sixpack && \
 	unzip ../sixpack-13.zip 
+ifeq ($(UNAME), Linux)
 	cp work/sixpack/sixpack-12/bin/sixpack $@ 
+else ifeq ($(UNAME), Darwin)
+	cd work/sixpack/sixpack-12 && \
+	unzip ../../sixpack-extra.zip
+	cd work/sixpack/sixpack-12/src && \
+	clang++ -stdlib=libc++ cximage.cpp dib.cpp lzss.cpp neuquant.cpp octree.cpp main.cpp ../libs/aplib.a -o ../bin/sixpack_osx
+	cp work/sixpack/sixpack-12/bin/sixpack_osx $@ 
+endif
 	chmod +x $@	
 
 #genres $(TOOLSDIR)/genres: genres_01.zip
