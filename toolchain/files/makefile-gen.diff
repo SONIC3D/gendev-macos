@@ -16,13 +16,11 @@
  newlib_ver=1.19.0
  thread_model=single
  erase=0
-@@ -83,8 +84,8 @@
- 	@echo "+++ Building $(src_dir) to $(build)..."
+@@ -84,7 +85,7 @@
  	-mkdir -p $(build)
  	> $(log)
--	cd $(build); ../$(src_dir)/configure --target=$(target) --prefix=$(prefix) --enable-install-libbfd $(to_log)
+ 	cd $(build); ../$(src_dir)/configure --target=$(target) --prefix=$(prefix) --enable-install-libbfd $(to_log)
 -	make -C $(build) all install DESTDIR=$(DESTDIR) $(to_log)
-+	cd $(build); ../$(src_dir)/configure --target=$(target) --prefix=$(prefix) --enable-install-libbfd --disable-werror $(to_log)
 +	$(MAKE) -C $(build) all install DESTDIR=$(DESTDIR) $(to_log)
  	$(clean_up)
  
