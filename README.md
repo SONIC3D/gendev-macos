@@ -14,7 +14,7 @@ with minimal changes applied.
 ### OS and Build tools
 
 Mac OS X Yosemite 10.10.3 with Command Line Tools for XCode 6.4 is the reference build 
-environment for current release.That means it should be built with Apple LLVM 6.1.0 (clang-
+environment for current release. That means it should be built with Apple LLVM 6.1.0 (clang-
 602.0.53).
 
 4.9G disk storage space is required for temporary obj files and target files generation.
@@ -41,7 +41,7 @@ cd .. && rm -rf wget*
 ### Build path accessibility
 
 The path /opt/toolchains/gen/ may required to be created manually with root permission.
-And it should be chmoded to make the shell user writable.
+It should be chmoded to make the shell user writable.
 
 ```sh
 sudo mkdir -p /opt/toolchains/gen
