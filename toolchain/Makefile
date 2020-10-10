@@ -11,6 +11,11 @@ GCC_VERSION=6.3.0
 BINUTILS_VERSION=2.24
 NEWLIB_VERSION=1.19.0
 
+MGET?= curl
+URL_GCC=http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
+URL_BINUTILS=http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
+URL_NEWLIB=ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
+
 LOG?=/dev/null
 
 PATH := $(BUILDDIR)/bin:$(PATH)
@@ -67,6 +72,29 @@ toolchain_clean:
 #####################################################
 #####################################################
 #####################################################
+# Download files to local cache dir, which is specified by $(FILESDIR)
+GCC_PKG_CACHING=$(FILESDIR)/gcc-$(GCC_VERSION).tar.bz2
+$(FILESDIR)/gcc-$(GCC_VERSION).tar.bz2:
+	cd $(FILESDIR) && $(MGET) -o gcc-$(GCC_VERSION).tar.bz2 $(URL_GCC)
+
+BINUTILS_PKG_CACHING=$(FILESDIR)/binutils-$(BINUTILS_VERSION).tar.bz2
+$(FILESDIR)/binutils-$(BINUTILS_VERSION).tar.bz2:
+	cd $(FILESDIR) && $(MGET) -o binutils-$(BINUTILS_VERSION).tar.bz2 $(URL_BINUTILS)
+
+NEWLIB_PKG_CACHING=$(FILESDIR)/newlib-$(NEWLIB_VERSION).tar.gz
+$(FILESDIR)/newlib-$(NEWLIB_VERSION).tar.gz:
+	cd $(FILESDIR) && $(MGET) -o newlib-$(NEWLIB_VERSION).tar.gz $(URL_NEWLIB)
+
+# Caution: This target should be individually make before make the `setup`target
+#          Because the `$(PKGS)` target string is one pass generated before the
+#          actual download target files created. It will skip extracting those
+#          files newly downloaded in current make session.
+download-prerequisite-files: $(GCC_PKG_CACHING) $(BINUTILS_PKG_CACHING) $(NEWLIB_PKG_CACHING)
+	@echo "Prerequisite files are all ready now."
+
+#####################################################
+#####################################################
+#####################################################
 TGZS=$(wildcard $(FILESDIR)/*.tar.gz)
 BZ2S+=$(wildcard $(FILESDIR)/*.tar.bz2)
 
@@ -83,7 +111,7 @@ $(WORKDIR)/%: $(FILESDIR)/%
 	tar xf $<.*
 
 $(FILESDIR)/%:
-	@echo "Will extract $@"
+	@echo "# Will extract $@(*.tar.gz or *.tar.bz2)"
 
 setup: $(WORKDIR) $(PKGS)
 	echo $< $@

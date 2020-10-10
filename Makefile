@@ -24,7 +24,7 @@ $(BUILDDIR):
 	mkdir -p $@
 
 toolchain_build:
-	cd toolchain && make toolchain_build
+	cd toolchain && make download-prerequisite-files && make toolchain_build
 
 toolchain_clean:
 	cd toolchain && make toolchain_clean
