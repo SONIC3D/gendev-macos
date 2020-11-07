@@ -28,7 +28,7 @@ endif
 TOOLS+=$(TOOLSDIR)/appack
 
 tools_build: $(WORKDIR) $(TOOLSDIR) $(TOOLS)
-	-cp extras/scripts/*.* $(TOOLSDIR)/.
+	-cp $(TOPDIR)/extras/scripts/*.* $(TOOLSDIR)/.
 	echo "Done with tools."
 
 tools_clean:
