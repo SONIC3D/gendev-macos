@@ -1,4 +1,4 @@
-GENDEV?=/opt/toolchains/gen/
+GENDEV?=/opt/gendev
 GCC_VER?=6.3.0
 
 MAKE?=make
