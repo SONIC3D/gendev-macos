@@ -1,3 +1,4 @@
 .DS_Store
 work
 sgdk/sgdk-read-only
+/build/
