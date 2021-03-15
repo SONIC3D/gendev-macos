@@ -14,7 +14,7 @@ NEWLIB_VERSION=1.19.0
 MGET?= curl
 URL_GCC=http://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.bz2
 URL_BINUTILS=http://ftp.gnu.org/gnu/binutils/binutils-$(BINUTILS_VERSION).tar.bz2
-URL_NEWLIB=ftp://sources.redhat.com/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
+URL_NEWLIB=ftp://sourceware.org/pub/newlib/newlib-$(NEWLIB_VERSION).tar.gz
 
 LOG?=/dev/null
 
